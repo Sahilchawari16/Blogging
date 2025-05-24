@@ -2,7 +2,7 @@ import {Request, Response} from "express";
 import User from '../model/User.js';
 import jwt from 'jsonwebtoken';
 
-export const loginUser = async(req: Request, res: Response){
+export const loginUser = async(req: Request, res: Response)=>{
     try {
         const {email, name, image} = req.body;
 
