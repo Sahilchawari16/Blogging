@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectDb from './utils/db.js';
 import userRoutes from './routes/user.js';
 import { v2 as cloudinary } from 'cloudinary';
+import cors from 'cors';
 dotenv.config();
 //Cloudinay Connection Configuration
 cloudinary.config({
@@ -11,6 +12,7 @@ cloudinary.config({
     api_secret: process.env.Cloud_Api_Sec
 });
 const app = express();
+app.use(cors());
 app.use(express.json());
 //Connection with Mongodb
 connectDb();
