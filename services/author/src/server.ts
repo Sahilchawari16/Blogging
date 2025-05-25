@@ -1,8 +1,16 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import {sql} from './utils/db.js';
+import blogRoutes from './routes/blog.js';
+import {v2 as cloudinary} from 'cloudinary';
 
 dotenv.config();
+
+cloudinary.config({
+    cloud_name: process.env.Cloud_Name,
+    api_key: process.env.Cloud_Api_Key,
+    api_secret: process.env.Cloud_Api_Sec
+});
 
 const app = express();
 const port = process.env.PORT;
@@ -19,7 +27,7 @@ async function initDB() {
         category VARCHAR(255) NOT NULL,
         author VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        );
         `;
 
         await sql`
@@ -30,7 +38,7 @@ async function initDB() {
         username VARCHAR(255) NOT NULL,
         blogid VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        );
         `;
 
         await sql`
@@ -39,7 +47,7 @@ async function initDB() {
         userid VARCHAR(255) NOT NULL,
         blogid VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        );
         `;
 
         console.log("database initialized sucessfully");
@@ -48,6 +56,8 @@ async function initDB() {
         console.log("Error initdb", error);
     }
 }
+
+app.use("/api/v1", blogRoutes);
 
 initDB().then(()=>{
 
