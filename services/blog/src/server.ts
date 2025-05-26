@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import blogRoutes from './routes/blog.js';
 import { Redis } from '@upstash/redis';
+import { startCacheConsumer } from './utils/consumer.js';
 
 
 
@@ -9,6 +10,8 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT
+
+startCacheConsumer();
 
 export const redisClient = new Redis({
     url: process.env.REDIS_URL,
