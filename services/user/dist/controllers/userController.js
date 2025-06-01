@@ -9,7 +9,7 @@ export const loginUser = TryCatch(async (req, res) => {
     const { code } = req.body;
     if (!code) {
         res.status(400).json({
-            message: "Authorization Code Provided",
+            message: "Authorization Code Not Provided",
         });
         return;
     }

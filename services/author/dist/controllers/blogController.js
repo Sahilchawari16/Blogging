@@ -3,6 +3,9 @@ import TryCatch from "../utils/TryCatch.js";
 import cloudinary from 'cloudinary';
 import { sql } from "../utils/db.js";
 import { invalidateCacheJob } from "../utils/rabbitmq.js";
+import { GoogleGenAI } from "@google/genai";
+import dotenv from 'dotenv';
+dotenv.config();
 export const createBlog = TryCatch(async (req, res) => {
     const { title, description, blogcontent, category } = req.body;
     const file = req.file;
@@ -99,4 +102,32 @@ export const deletedblog = TryCatch(async (req, res) => {
     res.json({
         message: "Blog Deleted",
     });
+});
+export const aiTitleResponse = TryCatch(async (req, res) => {
+    const { text } = req.body;
+    const prompt = `Correct the grammar of the following blog title and return only the corrected title without any additional text, formatting, or symbols: "${text}"`;
+    let result;
+    const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+    });
+    async function main() {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.0-flash",
+            contents: prompt,
+        });
+        let rawtext = response.text;
+        if (!rawtext) {
+            res.status(400).json({
+                message: "Something went wrong",
+            });
+            return;
+        }
+        result = rawtext
+            .replace(/\*\*/g, "")
+            .replace(/[\r\n]+/g, "")
+            .replace(/[*_`~]/g, "")
+            .trim();
+    }
+    await main();
+    res.json(result);
 });

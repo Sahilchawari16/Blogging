@@ -1,8 +1,10 @@
 "use client";
 
-import { createContext ,ReactNode, useContext, useEffect, useState } from "react";
+import React, { createContext ,ReactNode, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
+import toast, {Toaster} from 'react-hot-toast';
+import {GoogleOAuthProvider} from '@react-oauth/google'
 
 export const user_service = "http://localhost:5000";
 export const author_service = "http://localhost:5001";
@@ -32,6 +34,13 @@ export interface Blog{
 
 interface AppContextType {
     user: User | null;
+    loading: boolean;
+    isAuth: boolean;
+    setUser: React.Dispatch<React.SetStateAction<User | null>>;
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsAuth: React.Dispatch<React.SetStateAction<boolean>>;
+    logoutUser: () => Promise<void>;
+    
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -42,34 +51,44 @@ interface AppProviderProps{
 
 
 
-export const AppProvider: React.FC<AppProviderProps> = ({children}) => {
-    const [user, setUser] = useState(null);
+export const AppProvider: React.FC<AppProviderProps> = ({children} )=> {
+    const [user, setUser] = useState<User | null>(null);
     const [isAuth, setIsAuth] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    async function fetchUser() {
-        try {
-            const token = Cookies.get("token");
-            const {data} = await axios.get(`${user_service}/api/v1/me`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+    const google_Client_Id = "1047275181073-bqrjg5or38o2i36s8bkf9ockjr0tcu7k.apps.googleusercontent.com";
 
-            setUser(data);
-            setIsAuth(true);
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching user:", error);
-            setLoading(false);
-        }
+    async function fetchUser() {
+    try {
+      const token = Cookies.get("token");
+
+      const { data } = await axios.get(`${user_service}/api/v1/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUser(data);
+      setIsAuth(true);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
     }
+  }
+
+  async function logoutUser() {
+    Cookies.remove("token");
+    setUser(null);
+    setIsAuth(false);
+    toast.success("Logged out successfully");
+  }
 
     useEffect(()=>{
         fetchUser();
     }, []);
 
-   return <AppContext.Provider value={{user}}></AppContext.Provider>
+   return <AppContext.Provider value={{user, setIsAuth, isAuth, setLoading, loading, setUser, logoutUser}}><GoogleOAuthProvider clientId={google_Client_Id}>{children}<Toaster/></GoogleOAuthProvider></AppContext.Provider>
 
 }
 

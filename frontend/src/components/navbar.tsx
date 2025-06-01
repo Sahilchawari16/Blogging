@@ -1,13 +1,16 @@
 "use client";
 
-import { LogIn, Menu, X } from 'lucide-react';
+import { CircleUserRound, LogIn, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react'
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { useAppData } from '@/context/AppContext';
+import Loading from './loading';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const {loading, isAuth} = useAppData();
   return (
     <nav className='bg-white shadow-md p-4 z-50'>
       <div className='container mx-auto flex justify-between items-center'>
@@ -20,7 +23,7 @@ const Navbar = () => {
         </div>  <ul className="hidden md:flex justify-center items-center space-x-6 text-grey-700">
             <li><Link href={"/"} className='hover:text-blue-500'>Home</Link></li>
             <li><Link href={"/blogs/saved"} className='hover:text-blue-500'>Saved Blogs</Link></li>
-            <li><Link href={"/login"} className='hover:text-blue-500'><LogIn/></Link></li>
+            {loading? ("") : (<li>{isAuth? (<Link href={"/profile"} className='hover:text-blue-500'><CircleUserRound/></Link>) : (<Link href={"/login"} className='hover:text-blue-500'><LogIn/></Link>)}</li>)}
         </ul>
       </div>
       <div className={cn("md:hidden overflow-hidden transition-all duration-300 ease-in-out", isOpen ? "max-h-40 opacity-100 top-full": "max-h-0 opacity-0 -top-full")}>
